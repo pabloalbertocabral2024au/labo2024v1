@@ -11,7 +11,9 @@ require("parallel")
 
 PARAM <- list()
 # reemplazar por las propias semillas
-PARAM$semillas <- c(102191, 200177, 410551, 552581, 892237)
+#PARAM$semillas <- c(102191, 200177, 410551, 552581, 892237)
+PARAM$semillas <- c(100019, 100043, 100049, 100057, 100069)
+
 
 #------------------------------------------------------------------------------
 # particionar agrega una columna llamada fold a un dataset
@@ -89,6 +91,7 @@ ArbolesMontecarlo <- function(semillas, param_basicos) {
 #------------------------------------------------------------------------------
 
 # Aqui se debe poner la carpeta de la computadora local
+# setwd("~/buckets/b1/") # Establezco el Working Directory
 setwd("~/buckets/b1/") # Establezco el Working Directory
 # cargo los datos
 
@@ -113,8 +116,11 @@ tb_grid_search <- data.table( max_depth = integer(),
 
 # itero por los loops anidados para cada hiperparametro
 
-for (vmax_depth in c(4, 6, 8, 10, 12, 14)) {
+for (cp_value in c(-0.5, -0.25, 0, 0.25, 0.5)) {
+ for (vmax_depth in c(4, 6, 8, 10, 12, 14)) {
   for (vmin_split in c(1000, 800, 600, 400, 200, 100, 50, 20, 10)) {
+    for (minbucket_value in c(5, 10, 15, 20, 25)) {
+    
     # notar como se agrega
 
     # vminsplit  minima cantidad de registros en un nodo para hacer el split
@@ -133,7 +139,9 @@ for (vmax_depth in c(4, 6, 8, 10, 12, 14)) {
       list( tb_grid_search, 
             list( vmax_depth, vmin_split, ganancia_promedio) ) )
 
-  }
+    }
+   }
+ } 
 
   # escribo la tabla a disco en cada vuelta del loop mas externo
   Sys.sleep(2)  # espero un par de segundos
