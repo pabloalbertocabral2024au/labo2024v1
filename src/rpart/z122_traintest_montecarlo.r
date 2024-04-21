@@ -1,7 +1,3 @@
-# esqueleto de grid search
-# se espera que los alumnos completen lo que falta
-#   para recorrer TODOS cuatro los hiperparametros
-
 rm(list = ls()) # Borro todos los objetos
 gc() # Garbage Collection
 
@@ -14,10 +10,10 @@ PARAM <- list()
 PARAM$semillas <- c(102191, 200177, 410551, 552581, 892237)
 
 #------------------------------------------------------------------------------
-# particionar agrega una columna llamada fold a un dataset
-#  que consiste en una particion estratificada segun agrupa
+# particionar agrega una columna llamada fold a un dataset que consiste
+#  en una particion estratificada segun agrupa
 # particionar( data=dataset, division=c(70,30), agrupa=clase_ternaria, seed=semilla)
-#   crea una particion 70, 30
+#  crea una particion 70, 30
 
 particionar <- function(data, division, agrupa = "", campo = "fold", start = 1, seed = NA) {
   if (!is.na(seed)) set.seed(seed)
@@ -37,7 +33,7 @@ ArbolEstimarGanancia <- function(semilla, param_basicos) {
   particionar(dataset, division = c(7, 3), agrupa = "clase_ternaria", seed = semilla)
 
   # genero el modelo
-  # quiero predecir clase_ternaria a partir del resto
+  # predecir clase_ternaria a partir del resto
   modelo <- rpart("clase_ternaria ~ .",
     data = dataset[fold == 1], # fold==1  es training,  el 70% de los datos
     xval = 0,
@@ -67,23 +63,16 @@ ArbolEstimarGanancia <- function(semilla, param_basicos) {
   # escalo la ganancia como si fuera todo el dataset
   ganancia_test_normalizada <- ganancia_test / 0.3
 
-  return(ganancia_test_normalizada)
-}
-#------------------------------------------------------------------------------
-
-ArbolesMontecarlo <- function(semillas, param_basicos) {
-  # la funcion mcmapply  llama a la funcion ArbolEstimarGanancia
-  #  tantas veces como valores tenga el vector  PARAM$semillas
-  ganancias <- mcmapply(ArbolEstimarGanancia,
-    semillas, # paso el vector de semillas
-    MoreArgs = list(param_basicos), # aqui paso el segundo parametro
-    SIMPLIFY = FALSE,
-    mc.cores = 5 # en Windows este valor debe ser 1
-  )
-
-  ganancia_promedio <- mean(unlist(ganancias))
-
-  return(ganancia_promedio)
+  return(list(
+    "testing" = dataset[fold == 2, .N],
+    "testing_pos" = dataset[fold == 2 & clase_ternaria == "BAJA+2", .N],
+    "envios" = dataset[fold == 2, sum(prediccion[, "BAJA+2"] > 0.025)],
+    "aciertos" = dataset[
+      fold == 2,
+      sum(prediccion[, "BAJA+2"] > 0.025 & clase_ternaria == "BAJA+2")
+    ],
+    "ganancia_test" = ganancia_test_normalizada
+  ))
 }
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -98,47 +87,40 @@ dataset <- fread("./datasets/dataset_pequeno.csv")
 # trabajo solo con los datos con clase, es decir 202107
 dataset <- dataset[clase_ternaria != ""]
 
-# genero el archivo para Kaggle
-# creo la carpeta donde va el experimento
-# HT  representa  Hiperparameter Tuning
-dir.create("./exp/", showWarnings = FALSE)
-dir.create("./exp/HT2020/", showWarnings = FALSE)
-archivo_salida <- "./exp/HT2020/gridsearch.txt"
 
-# genero la data.table donde van los resultados del Grid Search
-tb_grid_search <- data.table( max_depth = integer(),
-                              min_split = integer(),
-                              ganancia_promedio = numeric() )
+param_basicos <- list(
+  "cp" = -1, # complejidad minima
+  "minsplit" = 900, # minima cant de registros en un nodo para hacer el split
+  "minbucket" = 440, # minima cantidad de registros en una hoja
+  "maxdepth" = 5
+) # profundidad máxima del arbol
+
+# Un solo llamado, con la semilla 17
+ArbolEstimarGanancia(17, param_basicos)
 
 
-# itero por los loops anidados para cada hiperparametro
+# la funcion mcmapply  llama a la funcion ArbolEstimarGanancia
+#  tantas veces como valores tenga el vector  PARAM$semillas
+salidas <- mcmapply(ArbolEstimarGanancia,
+  PARAM$semillas, # paso el vector de semillas
+  MoreArgs = list(param_basicos), # aqui paso el segundo parametro
+  SIMPLIFY = FALSE,
+  mc.cores = 5  # en Windows este valor debe ser 1
+)
 
-for (vmax_depth in c(4, 6, 8, 10, 12, 14)) {
-  for (vmin_split in c(1000, 800, 600, 400, 200, 100, 50, 20, 10)) {
-    # notar como se agrega
+# muestro la lista de las salidas en testing
+#  para la particion realizada con cada semilla
+salidas
 
-    # vminsplit  minima cantidad de registros en un nodo para hacer el split
-    param_basicos <- list(
-      "cp" = -0.5, # complejidad minima
-      "minsplit" = vmin_split,
-      "minbucket" = 5, # minima cantidad de registros en una hoja
-      "maxdepth" = vmax_depth
-    ) # profundidad máxima del arbol
+# paso la lista a vector
+tb_salida <- rbindlist(salidas)
 
-    # Un solo llamado, con la semilla 17
-    ganancia_promedio <- ArbolesMontecarlo(PARAM$semillas, param_basicos)
+tb_salida
 
-    # agrego a la tabla
-    tb_grid_search <- rbindlist( 
-      list( tb_grid_search, 
-            list( vmax_depth, vmin_split, ganancia_promedio) ) )
+# finalmente calculo la media (promedio)  de las ganancias
+tb_salida[, mean(ganancia_test)]
 
-  }
+# calculo todos los promedios
+tb_salida[, lapply(.SD, mean)]
 
-  # escribo la tabla a disco en cada vuelta del loop mas externo
-  Sys.sleep(2)  # espero un par de segundos
-
-  fwrite( tb_grid_search,
-          file = archivo_salida,
-          sep = "\t" )
-}
+# desvio estandar Distribucion Binomial   sqrt( n * p * (1-p) )
