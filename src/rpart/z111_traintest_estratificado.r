@@ -5,7 +5,7 @@ require("data.table")
 require("rpart")
 
 PARAM <- list()
-PARAM$semilla <- 102191
+PARAM$semilla <- 102191 # 100069 # 100057 # 100049 #100043 #100019 # 102191
 
 #------------------------------------------------------------------------------
 # particionar agrega una columna llamada fold a un dataset
@@ -33,7 +33,7 @@ particionar <- function(
 
 # Aqui se debe poner la carpeta de la computadora local
 # Establezco el Working Directory
-setwd("X:\\gdrive\\austral2023r\\")
+setwd("C:\\labaustral\\") # setwd("X:\\gdrive\\austral2023r\\")
 
 # cargo los datos
 dataset <- fread("./datasets/dataset_pequeno.csv")
@@ -58,17 +58,17 @@ param_basicos <- list(
 # quiero predecir clase_ternaria a partir del resto
 # fold==1  es training,  el 70% de los datos
 modelo <- rpart("clase_ternaria ~ .",
-  data = dataset[fold == 1],
-  xval = 0,
-  control = param_basicos # aqui van los parametros
-)
+                 data = dataset[fold == 1],
+                 xval = 0,
+                 control = param_basicos # aqui van los parametros
+                )
 
 
 # aplico el modelo a los datos de testing
 prediccion <- predict(modelo, # el modelo que genere recien
-  dataset[fold == 2], # fold==2  es testing, el 30% de los datos
-  type = "prob"
-) # type= "prob"  es que devuelva la probabilidad
+              dataset[fold == 2], # fold==2  es testing, el 30% de los datos
+              type = "prob"
+              ) # type= "prob"  es que devuelva la probabilidad
 
 # prediccion es una matriz con TRES columnas,
 #  llamadas "BAJA+1", "BAJA+2"  y "CONTINUA"
