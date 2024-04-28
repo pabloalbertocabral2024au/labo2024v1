@@ -1,5 +1,6 @@
 # Corrida general del Workflow de Guantes Blancos
-# para aprender lo conceptual, sin ensuciarse las manos
+# para aprender lo conceptual, sin ensuciarse las manos, subo sin letra Z y lo pruebo como esta
+# para ver como crea las carptas y que deja
 
 # limpio la memoria
 rm(list = ls(all.names = TRUE)) # remove all objects
