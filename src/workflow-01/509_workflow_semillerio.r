@@ -13,16 +13,16 @@ require("ParamHelpers")
 envg <- env()
 
 envg$EXPENV <- list()
-envg$EXPENV$exp_dir <- "~/buckets/b1/exp/"
-envg$EXPENV$wf_dir <- "~/buckets/b1/flow/"
-envg$EXPENV$wf_dir_local <- "~/flow/"
+envg$EXPENV$exp_dir <- "~/buckets/b1/exp2/"
+envg$EXPENV$wf_dir <- "~/buckets/b1/flow2/"
+envg$EXPENV$wf_dir_local <- "~/flow2/"
 envg$EXPENV$repo_dir <- "~/labo2024v1/"
 envg$EXPENV$datasets_dir <- "~/buckets/b1/datasets/"
 envg$EXPENV$arch_sem <- "mis_semillas.txt"
 
 # default
-envg$EXPENV$gcloud$RAM <- 64
-envg$EXPENV$gcloud$cCPU <- 8
+envg$EXPENV$gcloud$RAM <- 512
+envg$EXPENV$gcloud$cCPU <- 24
 
 #------------------------------------------------------------------------------
 # Error catching
@@ -153,6 +153,7 @@ FE_historia_baseline <- function( pmyexp, pinputexps, pserver="local")
   return( exp_correr_script( param_local ) ) # linea fija
 }
 #------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # Training Strategy baseline 202109
 
 TS_strategy_baseline_202109 <- function( pmyexp, pinputexps, pserver="local")
@@ -162,60 +163,49 @@ TS_strategy_baseline_202109 <- function( pmyexp, pinputexps, pserver="local")
   param_local$meta$script <- "/src/workflow-01/z551_TS_training_strategy.r"
 
 
-  #param_local$future <- c(202109)
-  #param_local$final_train <- c(202107, 202106, 202105, 202104, 202103, 202102, 202101, 202012, 202011)
-#
-#
-  #param_local$train$training <- c(202105, 202104, 202103, 202102, 202101, 202012, 202011, 202010, 202009)
-  #param_local$train$validation <- c(202106)
-  #param_local$train$testing <- c(202107)
-
-
   param_local$future <- c(202109)
-  param_local$final_train <- c(202107, 202106, 202105, 202104, 202103, 202102, 202101, 202002, 202001,201912)
+  param_local$final_train <- c(202107, 202106, 202105, 202104, 202103, 202102, 202101, 202012, 202011, 202003, 202002, 202001, 201912, 201911, 201910, 201909, 201908, 201907, 201906, 201905)
 
-
-  param_local$train$training <- c(202105,202104, 202103, 202102 202101, 202002, 202001, 201912, 201911, 201910, 201909)
+  param_local$train$training <- c(202105, 202104, 202103, 202102, 202101, 202012, 202011, 202003, 202002, 202001, 201912, 201911, 201910, 201909, 201908, 201907, 201906, 201905, 201904, 201903)
   param_local$train$validation <- c(202106)
-  param_local$train$testing <- c(202108,202107)
-
+  param_local$train$testing <- c(202107)
 
   # undersampling  baseline
-  param_local$train$undersampling <- 0.2
+  param_local$train$undersampling <- 0.3
 
   return( exp_correr_script( param_local ) ) # linea fija
 }
 #------------------------------------------------------------------------------
 # Training Strategy baseline  202107
 
-TS_strategy_baseline_202107 <- function( pmyexp, pinputexps, pserver="local")
-{
-  if( -1 == (param_local <- exp_init( pmyexp, pinputexps, pserver ))$resultado ) return( 0 )# linea fija
-
-  param_local$meta$script <- "/src/workflow-01/z551_TS_training_strategy.r"
-
-
-  #param_local$future <- c(202107)
-  #param_local$final_train <- c(202105, 202104, 202103, 202102, 202101, 202012, 202011, 202010, 202009)
+#TS_strategy_baseline_202107 <- function( pmyexp, pinputexps, pserver="local")
+#{
+#  if( -1 == (param_local <- exp_init( pmyexp, pinputexps, pserver ))$resultado ) return( 0 )# linea fija
+#
+#  param_local$meta$script <- "/src/workflow-01/z551_TS_training_strategy.r"
 #
 #
-  #param_local$train$training <- c(202103, 202102, 202101, 202012, 202011, 202010, 202009, 202008, 202007)
-  #param_local$train$validation <- c(202104)
-  #param_local$train$testing <- c(202105)
-
-  param_local$future <- c(202107)
-  param_local$final_train <- c(202106,202105, 202104, 202103, 202102, 202101, 202022, 202001, 201912)
-
-
-  param_local$train$training <- c(202104,202103, 202102, 202101, 202002, 202001, 201912, 201911, 201910, 201909)
-  param_local$train$validation <- c(202105)
-  param_local$train$testing <- c(202106)
-
-  # undersampling  baseline
-  param_local$train$undersampling <- 0.2
-
-  return( exp_correr_script( param_local ) ) # linea fija
-}
+#  #param_local$future <- c(202107)
+#  #param_local$final_train <- c(202105, 202104, 202103, 202102, 202101, 202012, 202011, 202010, 202009)
+##
+##
+#  #param_local$train$training <- c(202103, 202102, 202101, 202012, 202011, 202010, 202009, 202008, 202007)
+#  #param_local$train$validation <- c(202104)
+#  #param_local$train$testing <- c(202105)
+#
+#  param_local$future <- c(202107)
+#  param_local$final_train <- c(202106,202105, 202104, 202103, 202102, 202101, 202022, 202001, 201912)
+#
+#
+#  param_local$train$training <- c(202104,202103, 202102, 202101, 202002, 202001, 201912, 201911, 201910, 201909)
+#  param_local$train$validation <- c(202105)
+#  param_local$train$testing <- c(202106)
+#
+#  # undersampling  baseline
+#  param_local$train$undersampling <- 0.2
+#
+#  return( exp_correr_script( param_local ) ) # linea fija
+#}
 #------------------------------------------------------------------------------
 # Hyperparamteter Tuning baseline
 
@@ -270,7 +260,7 @@ HT_tuning_baseline <- function( pmyexp, pinputexps, pserver="local")
 
   # una Beyesian de Guantes Blancos, solo hace 15 iteraciones
   #param_local$bo_iteraciones <- 50 # iteraciones de la Optimizacion Bayesiana
-  param_local$bo_iteraciones <- 75 # iteraciones de la Optimizacion Bayesiana
+  param_local$bo_iteraciones <- 100 # iteraciones de la Optimizacion Bayesiana
 
   return( exp_correr_script( param_local ) ) # linea fija
 }
